@@ -24,24 +24,24 @@ export function AboutPage() {
         <div className="border-t border-slate-700 pt-4">
           <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-300">Main features</h3>
           <ul className="mt-3 space-y-2 text-sm text-slate-400">
-            <li className="flex items-start gap-2">
-              <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-sky-400" />
+            <li className="flex items-center gap-2">
+              <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
               <span>Market overview with metrics and top movers</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-sky-400" />
+            <li className="flex items-center gap-2">
+              <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
               <span>Searchable and sortable coin listings</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-sky-400" />
+            <li className="flex items-center gap-2">
+              <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
               <span>Price history charts with multiple time ranges</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-sky-400" />
+            <li className="flex items-center gap-2">
+              <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
               <span>Persisted favorites and currency preferences</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-1 block size-1.5 shrink-0 rounded-full bg-sky-400" />
+            <li className="flex items-center gap-2">
+              <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
               <span>Real-time cryptocurrency converter</span>
             </li>
           </ul>
@@ -81,13 +81,43 @@ export function AboutPage() {
               <span className="font-medium text-slate-200">Feature-Sliced Design (FSD)</span>, organizing code into
               distinct layers:
             </p>
-            <ul className="mt-2 space-y-1">
-              <li>• <span className="font-medium text-slate-200">app</span> — initialization and routing</li>
-              <li>• <span className="font-medium text-slate-200">pages</span> — route-specific layouts</li>
-              <li>• <span className="font-medium text-slate-200">widgets</span> — reusable UI blocks</li>
-              <li>• <span className="font-medium text-slate-200">features</span> — user actions</li>
-              <li>• <span className="font-medium text-slate-200">entities</span> — business logic</li>
-              <li>• <span className="font-medium text-slate-200">shared</span> — primitives and utilities</li>
+            <ul className="mt-3 space-y-2 text-sm text-slate-400">
+              <li className="flex items-center gap-2">
+                <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
+                <span>
+                  <span className="font-medium text-slate-200">app</span> — initialization and routing
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
+                <span>
+                  <span className="font-medium text-slate-200">pages</span> — route-specific layouts
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
+                <span>
+                  <span className="font-medium text-slate-200">widgets</span> — reusable UI blocks
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
+                <span>
+                  <span className="font-medium text-slate-200">features</span> — user actions
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
+                <span>
+                  <span className="font-medium text-slate-200">entities</span> — business logic
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="block size-1.5 shrink-0 rounded-full bg-sky-400" />
+                <span>
+                  <span className="font-medium text-slate-200">shared</span> — primitives and utilities
+                </span>
+              </li>
             </ul>
           </div>
         </Card>
