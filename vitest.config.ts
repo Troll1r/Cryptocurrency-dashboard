@@ -11,7 +11,14 @@ export default mergeConfig(
       include: ['src/**/*.test.{ts,tsx}'],
       coverage: {
         provider: 'v8',
+        include: ['src/shared/lib/**/*.ts', 'src/entities/**/model/*Store.ts', 'src/features/**/*.{ts,tsx}'],
         exclude: ['src/**/*.stories.{ts,tsx}', 'src/**/index.ts', 'src/test/**'],
+        thresholds: {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80,
+        },
       },
     },
   }),
