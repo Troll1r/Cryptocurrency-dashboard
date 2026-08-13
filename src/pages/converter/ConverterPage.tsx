@@ -14,7 +14,7 @@ export function ConverterPage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-white">Cryptocurrency Converter</h1>
         <p className="max-w-2xl text-slate-400">
-          Select any cryptocurrency and instantly convert it to your display currency. Rates are updated every 60 seconds.
+          Convert one cryptocurrency into another coin instantly, with live prices refreshed every 60 seconds.
         </p>
       </header>
 
