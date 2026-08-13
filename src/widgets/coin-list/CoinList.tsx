@@ -5,6 +5,7 @@ import { AddToFavoritesButton } from '@/features/add-to-favorites'
 import type { CurrencyCode } from '@/shared/config'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
+import { Select } from '@/shared/ui/Select'
 
 export interface CoinListProps {
   coins: Coin[]
@@ -79,18 +80,18 @@ export function CoinList({
 
         <label className="flex items-center gap-2 text-sm text-slate-300">
           <span>Sort by</span>
-          <select
+          <Select
             aria-label="Sort by"
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as SortKey)}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-sm text-white focus:border-sky-400 focus:outline-none"
+            className="text-white"
           >
             {sortOptions.map(({ value, label }) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 

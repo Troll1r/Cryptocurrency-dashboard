@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { useCurrencyStore } from '@/entities/currency'
 import { SUPPORTED_CURRENCIES } from '@/shared/config'
 import type { CurrencyCode } from '@/shared/config'
+import { Select } from '@/shared/ui'
 
 export function CurrencySwitcher() {
   const id = useId()
@@ -13,18 +14,18 @@ export function CurrencySwitcher() {
       <label htmlFor={id} className="sr-only">
         Display currency
       </label>
-      <select
+      <Select
         id={id}
         value={currency}
         onChange={(event) => setCurrency(event.target.value as CurrencyCode)}
-        className="min-h-10 rounded-lg border border-slate-700 bg-slate-900 px-3 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-600"
+        className="min-w-28 font-semibold"
       >
         {SUPPORTED_CURRENCIES.map(({ code, label }) => (
           <option key={code} value={code}>
             {label}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   )
 }
