@@ -1,3 +1,5 @@
+export { CoinCard } from './ui'
+export type { CoinCardProps } from './ui'
 export { getCoinsMarkets, getMarketChart } from './api/coinApi'
 export { useCoinsQuery } from './model/useCoinsQuery'
 export { useFavoritesStore } from './model/useFavoritesStore'
