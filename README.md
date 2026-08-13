@@ -1,77 +1,80 @@
-# React + TypeScript + Vite
+# Crypto Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A cryptocurrency dashboard built with React, TypeScript, Vite, TanStack Query, Zustand, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The app displays live market data, historical price charts, favorites, currency switching, and a crypto converter. It follows a Feature-Sliced Design structure and supports client-side routing for market, favorites, converter, details, about, and 404 pages.
 
-## React Compiler
+## Stack
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- React 19
+- TypeScript
+- Vite 8
+- TanStack Query
+- Zustand
+- React Router
+- Recharts
+- Tailwind CSS 4
+- Vitest + React Testing Library
+- Storybook
 
-Note: This will impact Vite dev & build performances.
+## Routes
 
-## Expanding the ESLint configuration
+- `/` — overview
+- `/market` — market overview and pagination
+- `/favorites` — saved coins
+- `/converter` — crypto converter
+- `/coin/:id` — coin details and chart
+- `/about` — project overview
+- `/404` or any unknown path — not found page
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Local development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+pnpm install
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+pnpm dev
+pnpm build
+pnpm lint
+pnpm test
+pnpm test:coverage
+pnpm storybook
+pnpm build-storybook
 ```
+
+## Environment
+
+Create a `.env` file based on `.env.example` and provide the CoinGecko API configuration if needed.
+
+```bash
+cp .env.example .env
+```
+
+## Docker production build
+
+```bash
+docker build -t crypto-dashboard .
+docker run --rm -p 8080:80 crypto-dashboard
+```
+
+Then open:
+
+- http://localhost:8080/
+- http://localhost:8080/market
+- http://localhost:8080/coin/bitcoin
+
+The container uses a multi-stage Node build and nginx to serve the SPA with a fallback to `index.html` for client-side routes.
+
+## Notes
+
+- Data is fetched from the CoinGecko demo API.
+- Market data is paginated and rate-limited by the API provider.
+- The app persists favorites and the active currency in browser storage.
+- Storybook and production build are validated in CI-style checks before release.
+
