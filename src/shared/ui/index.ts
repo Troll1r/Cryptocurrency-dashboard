@@ -1,6 +1,8 @@
 export { Button } from './Button'
 export { Card } from './Card'
 export { Loader } from './Loader'
+export { Select } from './Select'
 export type { ButtonProps, ButtonVariant } from './Button'
 export type { CardProps } from './Card'
 export type { LoaderProps } from './Loader'
+export type { SelectProps } from './Select'

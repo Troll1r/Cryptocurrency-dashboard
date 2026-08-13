@@ -67,9 +67,10 @@ describe('ConverterPage', () => {
     renderPage()
 
     expect(screen.getByRole('heading', { name: 'Cryptocurrency Converter' })).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Select cryptocurrency' })).toBeInTheDocument()
-    expect(screen.getByText('Bitcoin (BTC)')).toBeInTheDocument()
-    expect(screen.getByText('Ethereum (ETH)')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toBeInTheDocument()
+    expect(screen.getAllByText('Bitcoin (BTC)')).toHaveLength(2)
+    expect(screen.getAllByText('Ethereum (ETH)')).toHaveLength(2)
   })
 
   it('shows loading state', () => {

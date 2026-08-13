@@ -75,20 +75,23 @@ describe('CurrencyConverter', () => {
   it('renders coin selection when coins array is provided', () => {
     render(<CurrencyConverter coins={[mockCoin, mockEthereum]} currency="usd" />)
 
-    expect(screen.getByRole('combobox', { name: 'Select cryptocurrency' })).toBeInTheDocument()
-    expect(screen.getByText('Bitcoin (BTC)')).toBeInTheDocument()
-    expect(screen.getByText('Ethereum (ETH)')).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toBeInTheDocument()
+    expect(screen.getAllByText('Bitcoin (BTC)')).toHaveLength(2)
+    expect(screen.getAllByText('Ethereum (ETH)')).toHaveLength(2)
   })
 
-  it('updates conversion when coin selection changes', async () => {
+  it('converts from one coin to another and updates when selection changes', async () => {
     const user = userEvent.setup()
     render(<CurrencyConverter coins={[mockCoin, mockEthereum]} currency="usd" />)
 
-    const select = screen.getByRole('combobox', { name: 'Select cryptocurrency' })
-    await user.selectOptions(select, 'ethereum')
+    expect(screen.getByText('16.66666667 ETH')).toBeInTheDocument()
+
+    const sourceSelect = screen.getByRole('combobox', { name: 'Select source cryptocurrency' })
+    await user.selectOptions(sourceSelect, 'ethereum')
 
     expect(screen.getByText('Convert Ethereum')).toBeInTheDocument()
-    expect(screen.getByText('$3,000.00')).toBeInTheDocument()
+    expect(screen.getByText('0.06 BTC')).toBeInTheDocument()
   })
 
   it('shows no coin message when no coins are available', () => {

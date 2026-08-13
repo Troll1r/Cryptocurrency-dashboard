@@ -3,6 +3,22 @@ import type { ChartPeriod, ChartPoint, CurrencyCode } from '@/entities/coin/mode
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
 
+export function formatXAxisTick(value: number, period: ChartPeriod): string {
+  const date = new Date(value)
+
+  if (period === '24h') {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(date)
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+  }).format(date)
+}
+
 export interface PriceChartProps {
   data: ChartPoint[]
   currency: CurrencyCode
@@ -75,7 +91,7 @@ export function PriceChart({ data, currency, activePeriod, onPeriodChange }: Pri
                 stroke="#94a3b8"
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => new Date(Number(value)).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                tickFormatter={(value) => formatXAxisTick(Number(value), activePeriod)}
               />
               <YAxis
                 stroke="#94a3b8"

@@ -61,7 +61,7 @@ export function MarketPage() {
         <Card className="p-5 text-slate-300">No market data available right now.</Card>
       ) : null}
 
-      {!isLoading && !isError && visibleCoins.length > 0 ? (
+      {!isError && visibleCoins.length > 0 ? (
         <>
           <div className="text-sm text-slate-400">Showing {visibleCoins.length} coins</div>
           <CoinList
