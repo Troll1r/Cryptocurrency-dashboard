@@ -18,7 +18,5 @@ export function useMarketChartQuery({ id, currency, period }: UseMarketChartQuer
     enabled: Boolean(normalizedId),
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
-    retry: 2,
-    refetchOnWindowFocus: false,
   })
 }
