@@ -1,12 +1,14 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { CurrencySwitcher } from '@/features/switch-currency'
+import { LanguageSwitcher } from '@/features/switch-language'
+import { useTranslation } from '@/shared/i18n'
 
 const navigationItems = [
-  { to: '/', label: 'Overview', end: true },
-  { to: '/market', label: 'Market', end: false },
-  { to: '/favorites', label: 'Favorites', end: false },
-  { to: '/converter', label: 'Converter', end: false },
-  { to: '/about', label: 'About', end: false },
+  { to: '/', translationKey: 'nav.overview', end: true },
+  { to: '/market', translationKey: 'nav.market', end: false },
+  { to: '/favorites', translationKey: 'nav.favorites', end: false },
+  { to: '/converter', translationKey: 'nav.converter', end: false },
+  { to: '/about', translationKey: 'nav.about', end: false },
 ] as const
 
 function getLinkClassName(isActive: boolean): string {
@@ -17,6 +19,8 @@ function getLinkClassName(isActive: boolean): string {
 }
 
 export function Layout() {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur">
@@ -29,14 +33,15 @@ export function Layout() {
             >
               Crypto Dashboard
             </NavLink>
-            <div className="xl:order-3">
+            <div className="flex items-center gap-2 xl:order-3">
+              <LanguageSwitcher />
               <CurrencySwitcher />
             </div>
           </div>
           <nav aria-label="Primary navigation" className="flex gap-1 overflow-x-auto pb-1 xl:order-2 xl:pb-0">
-            {navigationItems.map(({ to, label, end }) => (
+            {navigationItems.map(({ to, translationKey, end }) => (
               <NavLink key={to} to={to} end={end} className={({ isActive }) => getLinkClassName(isActive)}>
-                {label}
+                {t(translationKey)}
               </NavLink>
             ))}
           </nav>
