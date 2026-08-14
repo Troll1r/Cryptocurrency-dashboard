@@ -5,6 +5,7 @@ const variantClassNames = {
   primary: 'bg-sky-400 text-slate-950 hover:bg-sky-300',
   secondary: 'bg-slate-800 text-slate-100 hover:bg-slate-700',
   ghost: 'bg-transparent text-slate-200 hover:bg-slate-800',
+  danger: 'bg-rose-500 text-white hover:bg-rose-400',
 } as const
 
 export type ButtonVariant = keyof typeof variantClassNames

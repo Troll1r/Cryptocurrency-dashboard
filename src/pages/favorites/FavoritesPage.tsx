@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useCoinsQuery, useFavoritesStore } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { CoinList } from '@/widgets/coin-list'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
+import { Modal } from '@/shared/ui/Modal'
 import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 import { useTranslation } from '@/shared/i18n'
 
@@ -13,6 +14,7 @@ export function FavoritesPage() {
   const clearFavorites = useFavoritesStore((state) => state.clearFavorites)
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite)
   const { t } = useTranslation()
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false)
   const { data = [], isLoading, isError, error, refetch } = useCoinsQuery({
     currency,
     ids: favoriteIds,
@@ -40,7 +42,7 @@ export function FavoritesPage() {
           </p>
         </div>
         {favoriteCount > 0 ? (
-          <Button type="button" variant="secondary" onClick={clearFavorites}>
+          <Button type="button" variant="secondary" onClick={() => setIsClearConfirmOpen(true)}>
             {t('action.clearAll')}
           </Button>
         ) : null}
@@ -82,6 +84,31 @@ export function FavoritesPage() {
       {!isLoading && !isError && orderedCoins.length > 0 ? (
         <CoinList coins={orderedCoins} currency={currency} />
       ) : null}
+
+      <Modal
+        open={isClearConfirmOpen}
+        title={t('favorites.clearConfirmTitle')}
+        onClose={() => setIsClearConfirmOpen(false)}
+      >
+        <p className="text-sm text-slate-300">
+          {t('favorites.clearConfirmDescription', { count: favoriteCount })}
+        </p>
+        <div className="mt-5 flex justify-end gap-3">
+          <Button type="button" variant="secondary" onClick={() => setIsClearConfirmOpen(false)}>
+            {t('action.cancel')}
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => {
+              clearFavorites()
+              setIsClearConfirmOpen(false)
+            }}
+          >
+            {t('favorites.clearConfirmAction')}
+          </Button>
+        </div>
+      </Modal>
     </section>
   )
 }
