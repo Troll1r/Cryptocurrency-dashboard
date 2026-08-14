@@ -5,11 +5,6 @@ import {
   COINGECKO_API_KEY,
 } from '@/shared/config'
 
-interface ApiErrorResponse {
-  error?: string
-  message?: string
-}
-
 export class ApiError extends Error {
   readonly status: number | undefined
 
@@ -20,18 +15,18 @@ export class ApiError extends Error {
   }
 }
 
+function getStringProperty(data: object, property: string): string | undefined {
+  const value = Reflect.get(data, property)
+
+  return typeof value === 'string' && value.trim() ? value : undefined
+}
+
 function getResponseMessage(data: unknown): string | undefined {
-  if (!data || typeof data !== 'object') {
+  if (data === null || typeof data !== 'object') {
     return undefined
   }
 
-  const { error, message } = data as ApiErrorResponse
-
-  if (typeof error === 'string' && error.trim()) {
-    return error
-  }
-
-  return typeof message === 'string' && message.trim() ? message : undefined
+  return getStringProperty(data, 'error') ?? getStringProperty(data, 'message')
 }
 
 function getDefaultErrorMessage(status: number | undefined): string {
