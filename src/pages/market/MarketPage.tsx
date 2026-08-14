@@ -4,6 +4,7 @@ import { useCoinsQuery } from '@/entities/coin'
 import type { Coin } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { MARKET_PAGE_SIZE } from '@/shared/config'
+import type { CurrencyCode } from '@/shared/config'
 import { Card } from '@/shared/ui/Card'
 import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 
@@ -17,6 +18,15 @@ function mergeCoins(previous: Coin[], current: Coin[]): Coin[] {
 
 export function MarketPage() {
   const currency = useCurrencyStore((state) => state.currency)
+
+  return <MarketContent key={currency} currency={currency} />
+}
+
+interface MarketContentProps {
+  currency: CurrencyCode
+}
+
+function MarketContent({ currency }: MarketContentProps) {
   const [page, setPage] = useState(1)
   const [loadedCoins, setLoadedCoins] = useState<Coin[]>([])
 
@@ -38,7 +48,7 @@ export function MarketPage() {
   }
 
   return (
-    <section key={currency} className="space-y-6 py-6">
+    <section className="space-y-6 py-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-white">Market</h1>
         <p className="max-w-2xl text-slate-400">
