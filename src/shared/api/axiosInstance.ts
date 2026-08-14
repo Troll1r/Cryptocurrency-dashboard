@@ -5,14 +5,17 @@ import {
   COINGECKO_API_KEY,
 } from '@/shared/config'
 import { translate, useLanguageStore } from '@/shared/i18n'
+import type { TranslationKey } from '@/shared/i18n'
 
 export class ApiError extends Error {
   readonly status: number | undefined
+  readonly code: TranslationKey | undefined
 
-  constructor(message: string, status?: number) {
+  constructor(message: string, status?: number, code?: TranslationKey) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.code = code
   }
 }
 
@@ -30,22 +33,24 @@ function getResponseMessage(data: unknown): string | undefined {
   return getStringProperty(data, 'error') ?? getStringProperty(data, 'message')
 }
 
-function getDefaultErrorMessage(status: number | undefined): string {
-  const language = useLanguageStore.getState().language
-
+function getDefaultErrorCode(status: number | undefined): TranslationKey {
   if (status === 401 || status === 403) {
-    return translate(language, 'error.apiKeyInvalid')
+    return 'error.apiKeyInvalid'
   }
 
   if (status === 429) {
-    return translate(language, 'error.rateLimited')
+    return 'error.rateLimited'
   }
 
   if (status) {
-    return translate(language, 'error.requestFailed')
+    return 'error.requestFailed'
   }
 
-  return translate(language, 'error.network')
+  return 'error.network'
+}
+
+function getCurrentLanguage(): Parameters<typeof translate>[0] {
+  return useLanguageStore.getState().language
 }
 
 export function toApiError(error: unknown): ApiError {
@@ -54,15 +59,33 @@ export function toApiError(error: unknown): ApiError {
   }
 
   if (!axios.isAxiosError(error)) {
-    const language = useLanguageStore.getState().language
+    const code: TranslationKey = 'error.unexpected'
 
-    return new ApiError(translate(language, 'error.unexpected'))
+    return new ApiError(translate(getCurrentLanguage(), code), undefined, code)
   }
 
   const status = error.response?.status
-  const message = getResponseMessage(error.response?.data) ?? getDefaultErrorMessage(status)
+  const serverMessage = getResponseMessage(error.response?.data)
 
-  return new ApiError(message, status)
+  if (serverMessage) {
+    return new ApiError(serverMessage, status)
+  }
+
+  const code = getDefaultErrorCode(status)
+
+  return new ApiError(translate(getCurrentLanguage(), code), status, code)
+}
+
+export function getErrorMessage(
+  error: unknown,
+  t: (key: TranslationKey) => string,
+  fallbackMessage: string,
+): string {
+  if (error instanceof ApiError && error.code) {
+    return t(error.code)
+  }
+
+  return error instanceof Error ? error.message : fallbackMessage
 }
 
 export const axiosInstance = axios.create({

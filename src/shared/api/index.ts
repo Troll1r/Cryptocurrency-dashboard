@@ -1,1 +1,1 @@
-export { ApiError, axiosInstance, toApiError } from './axiosInstance'
+export { ApiError, axiosInstance, getErrorMessage, toApiError } from './axiosInstance'

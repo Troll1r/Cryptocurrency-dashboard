@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useCoinsQuery, useFavoritesStore, useMarketChartQuery } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { AddToFavoritesButton } from '@/features/add-to-favorites'
+import { getErrorMessage } from '@/shared/api'
 import { CHART_PERIODS } from '@/shared/config'
 import { useTranslation } from '@/shared/i18n'
 import { formatCompactNumber, formatPrice } from '@/shared/lib'
@@ -75,7 +76,7 @@ export function CoinDetailsPage() {
       <section className="space-y-4">
         <h1 className="text-3xl font-bold tracking-tight text-white">{t('details.notFound')}</h1>
         <p className="text-slate-400">
-          {marketError instanceof Error ? marketError.message : t('details.notFoundError')}
+          {getErrorMessage(marketError, t, t('details.notFoundError'))}
         </p>
         <div className="flex flex-wrap items-center gap-4">
           <Button type="button" variant="secondary" onClick={() => refetchMarket()}>
@@ -150,7 +151,7 @@ export function CoinDetailsPage() {
             ) : isChartError ? (
               <Card className="space-y-3 p-5">
                 <p className="text-sm text-rose-300">
-                  {chartError instanceof Error ? chartError.message : t('details.chartError')}
+                  {getErrorMessage(chartError, t, t('details.chartError'))}
                 </p>
                 <Button type="button" variant="secondary" onClick={() => refetchChart()}>
                   {t('action.retryChart')}

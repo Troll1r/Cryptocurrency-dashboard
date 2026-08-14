@@ -1,6 +1,7 @@
+import { getErrorMessage } from '@/shared/api'
+import { useTranslation } from '@/shared/i18n'
 import { Button } from '../Button'
 import { Card } from '../Card'
-import { useTranslation } from '@/shared/i18n'
 
 export interface QueryErrorStateProps {
   error: unknown
@@ -10,8 +11,8 @@ export interface QueryErrorStateProps {
 }
 
 export function QueryErrorState({ error, fallbackMessage, onRetry, retryLabel }: QueryErrorStateProps) {
-  const message = error instanceof Error ? error.message : fallbackMessage
   const { t } = useTranslation()
+  const message = getErrorMessage(error, t, fallbackMessage)
 
   return (
     <Card className="space-y-3 p-5">
