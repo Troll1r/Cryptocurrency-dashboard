@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { Coin } from '@/entities/coin/model/types'
+import { useMemo, useState } from 'react'
+import type { Coin } from '@/entities/coin'
 import type { CurrencyCode } from '@/shared/config'
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
@@ -19,30 +19,22 @@ function formatCoinAmount(value: number): string {
 
 export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConverterProps) {
   const [amount, setAmount] = useState('1')
-  const [selectedSourceCoinId, setSelectedSourceCoinId] = useState(coin?.id ?? coins[0]?.id ?? '')
-  const [selectedTargetCoinId, setSelectedTargetCoinId] = useState(() => {
-    const firstCoinId = coins[0]?.id
+  const [selectedSourceCoinId, setSelectedSourceCoinId] = useState(coin?.id ?? '')
+  const [selectedTargetCoinId, setSelectedTargetCoinId] = useState('')
+  const sourceCoinId =
+    coin?.id ??
+    (coins.some(({ id }) => id === selectedSourceCoinId)
+      ? selectedSourceCoinId
+      : coins[0]?.id ?? '')
+  const targetCoinId =
+    coin
+      ? ''
+      : coins.some(({ id }) => id === selectedTargetCoinId && id !== sourceCoinId)
+        ? selectedTargetCoinId
+        : coins.find(({ id }) => id !== sourceCoinId)?.id ?? ''
 
-    if (!firstCoinId) {
-      return ''
-    }
-
-    return coins.find(({ id }) => id !== firstCoinId)?.id ?? ''
-  })
-
-  const selectedSourceCoin = coin ?? coins.find((c) => c.id === selectedSourceCoinId)
-  const selectedTargetCoin = coin ? undefined : coins.find((c) => c.id === selectedTargetCoinId)
-
-  useEffect(() => {
-    if (coin || coins.length < 2) {
-      return
-    }
-
-    if (!selectedTargetCoinId || selectedTargetCoinId === selectedSourceCoinId) {
-      const fallbackTargetCoinId = coins.find(({ id }) => id !== selectedSourceCoinId)?.id ?? ''
-      setSelectedTargetCoinId(fallbackTargetCoinId)
-    }
-  }, [coin, coins, selectedSourceCoinId, selectedTargetCoinId])
+  const selectedSourceCoin = coin ?? coins.find((candidate) => candidate.id === sourceCoinId)
+  const selectedTargetCoin = coin ? undefined : coins.find((candidate) => candidate.id === targetCoinId)
 
   const parsedAmount = useMemo(() => {
     const normalized = amount.replace(/,/g, '.')
@@ -93,7 +85,7 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
             <label className="block text-sm text-slate-300">
               <span className="mb-2 block">From coin</span>
               <Select
-                value={selectedSourceCoinId}
+                value={sourceCoinId}
                 onChange={(event) => setSelectedSourceCoinId(event.target.value)}
                 className="w-full bg-slate-950 text-white"
                 aria-label="Select source cryptocurrency"
@@ -109,7 +101,7 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
             <label className="block text-sm text-slate-300">
               <span className="mb-2 block">To coin</span>
               <Select
-                value={selectedTargetCoinId}
+                value={targetCoinId}
                 onChange={(event) => setSelectedTargetCoinId(event.target.value)}
                 className="w-full bg-slate-950 text-white"
                 aria-label="Select target cryptocurrency"

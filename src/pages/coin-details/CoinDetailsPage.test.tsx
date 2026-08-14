@@ -79,4 +79,19 @@ describe('CoinDetailsPage', () => {
     expect(screen.getByText('Market cap')).toBeInTheDocument()
     expect(screen.getByText('24h range')).toBeInTheDocument()
   })
+
+  it('shows a chart-specific error and retry action', () => {
+    useMarketChartQueryMock.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: true,
+      error: new Error('Chart request failed'),
+      refetch: vi.fn(),
+    })
+
+    renderPage()
+
+    expect(screen.getByText('Chart request failed')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry chart' })).toBeInTheDocument()
+  })
 })

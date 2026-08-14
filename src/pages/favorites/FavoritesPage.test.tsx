@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFavoritesStore } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
@@ -79,5 +80,22 @@ describe('FavoritesPage', () => {
 
     expect(screen.getByText('Bitcoin')).toBeInTheDocument()
     expect(screen.getByRole('searchbox', { name: /search coins/i })).toBeInTheDocument()
+  })
+
+  it('allows removal of unavailable favorite IDs', async () => {
+    const user = userEvent.setup()
+    useFavoritesStore.setState({ favoriteIds: ['removed-coin'] })
+
+    render(
+      <MemoryRouter>
+        <FavoritesPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('removed-coin')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Remove' }))
+
+    expect(useFavoritesStore.getState().favoriteIds).toEqual([])
   })
 })

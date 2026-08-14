@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/shared/api'
-import { CHART_PERIODS, MARKET_PAGE_SIZE } from '@/shared/config'
+import { CHART_PERIODS, MARKET_PAGE_SIZE, MAX_COIN_IDS_PER_REQUEST } from '@/shared/config'
 import { formatChartData } from '@/shared/lib'
 import type {
   ChartPoint,
@@ -54,26 +54,63 @@ function getChartDays(period: MarketChartRequest['period']): number {
   return CHART_PERIODS.find(({ id }) => id === period)?.days ?? 1
 }
 
-export async function getCoinsMarkets({
-  currency,
-  page,
-  ids,
-}: CoinsMarketsRequest): Promise<Coin[]> {
-  if (ids?.length === 0) {
-    return []
+function normalizeIds(ids: readonly string[] | undefined): string[] | undefined {
+  if (!ids) {
+    return undefined
   }
 
+  return [...new Set(ids.map((id) => id.trim()).filter(Boolean))]
+}
+
+function splitIds(ids: readonly string[]): string[][] {
+  const chunks: string[][] = []
+
+  for (let index = 0; index < ids.length; index += MAX_COIN_IDS_PER_REQUEST) {
+    chunks.push(ids.slice(index, index + MAX_COIN_IDS_PER_REQUEST))
+  }
+
+  return chunks
+}
+
+async function requestCoinsMarkets(
+  currency: CoinsMarketsRequest['currency'],
+  page: number | undefined,
+  ids: readonly string[] | undefined,
+): Promise<Coin[]> {
   const { data } = await axiosInstance.get<CoinMarketResponse[]>('/coins/markets', {
     params: {
       vs_currency: currency,
       order: 'market_cap_desc',
-      per_page: MARKET_PAGE_SIZE,
+      per_page: ids?.length ?? MARKET_PAGE_SIZE,
       page: getPage(page),
       ...(ids?.length ? { ids: ids.join(',') } : {}),
     },
   })
 
   return data.map(mapCoin)
+}
+
+export async function getCoinsMarkets({
+  currency,
+  page,
+  ids,
+}: CoinsMarketsRequest): Promise<Coin[]> {
+  const normalizedIds = normalizeIds(ids)
+
+  if (normalizedIds?.length === 0) {
+    return []
+  }
+
+  if (!normalizedIds) {
+    return requestCoinsMarkets(currency, page, undefined)
+  }
+
+  const batches = splitIds(normalizedIds)
+  const responses = await Promise.all(
+    batches.map((batch) => requestCoinsMarkets(currency, page, batch)),
+  )
+
+  return responses.flat()
 }
 
 export async function getMarketChart({

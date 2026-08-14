@@ -1,23 +1,8 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import type { ChartPeriod, ChartPoint, CurrencyCode } from '@/entities/coin/model/types'
+import type { ChartPeriod, ChartPoint, CurrencyCode } from '@/entities/coin'
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
-
-export function formatXAxisTick(value: number, period: ChartPeriod): string {
-  const date = new Date(value)
-
-  if (period === '24h') {
-    return new Intl.DateTimeFormat(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-    }).format(date)
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-  }).format(date)
-}
+import { formatXAxisTick } from './lib/formatXAxisTick'
 
 export interface PriceChartProps {
   data: ChartPoint[]
