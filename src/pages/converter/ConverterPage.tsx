@@ -1,8 +1,8 @@
 import { useCoinsQuery } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
-import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
 import { Loader } from '@/shared/ui/Loader'
+import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 import { CurrencyConverter } from '@/widgets/currency-converter'
 
 export function ConverterPage() {
@@ -25,12 +25,7 @@ export function ConverterPage() {
       ) : null}
 
       {isError ? (
-        <Card className="space-y-3 p-5">
-          <p className="text-sm text-rose-300">{error instanceof Error ? error.message : 'Unable to load coins.'}</p>
-          <Button type="button" variant="secondary" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </Card>
+        <QueryErrorState error={error} fallbackMessage="Unable to load coins." onRetry={() => refetch()} />
       ) : null}
 
       {!isLoading && !isError && coins.length === 0 ? (

@@ -4,8 +4,8 @@ import { useCoinsQuery } from '@/entities/coin'
 import type { Coin } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { MARKET_PAGE_SIZE } from '@/shared/config'
-import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
+import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 
 function mergeCoins(previous: Coin[], current: Coin[]): Coin[] {
   const nextMap = new Map(previous.map((coin) => [coin.id, coin]))
@@ -49,12 +49,11 @@ export function MarketPage() {
       {isLoading && page === 1 ? <p className="text-slate-400">Loading market data…</p> : null}
 
       {isError ? (
-        <Card className="space-y-3 p-5">
-          <p className="text-sm text-rose-300">{error instanceof Error ? error.message : 'Unable to load market data.'}</p>
-          <Button type="button" variant="secondary" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </Card>
+        <QueryErrorState
+          error={error}
+          fallbackMessage="Unable to load market data."
+          onRetry={() => refetch()}
+        />
       ) : null}
 
       {!isLoading && !isError && visibleCoins.length === 0 ? (

@@ -4,6 +4,7 @@ import { useCurrencyStore } from '@/entities/currency'
 import { CoinList } from '@/widgets/coin-list'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
+import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 
 export function FavoritesPage() {
   const currency = useCurrencyStore((state) => state.currency)
@@ -46,12 +47,11 @@ export function FavoritesPage() {
       {isLoading ? <p className="text-slate-400">Loading favorites…</p> : null}
 
       {isError ? (
-        <Card className="space-y-3 p-5">
-          <p className="text-sm text-rose-300">{error instanceof Error ? error.message : 'Unable to load your favorites.'}</p>
-          <Button type="button" variant="secondary" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </Card>
+        <QueryErrorState
+          error={error}
+          fallbackMessage="Unable to load your favorites."
+          onRetry={() => refetch()}
+        />
       ) : null}
 
       {!isLoading && !isError && favoriteCount === 0 ? (
