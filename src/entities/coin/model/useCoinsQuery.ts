@@ -26,6 +26,5 @@ export function useCoinsQuery({ currency, page = 1, ids }: UseCoinsQueryOptions)
     gcTime: POLLING_INTERVAL_MS * 5,
     refetchInterval: hasRequestedIds ? false : POLLING_INTERVAL_MS,
     refetchIntervalInBackground: false,
-    retry: 2,
   })
 }

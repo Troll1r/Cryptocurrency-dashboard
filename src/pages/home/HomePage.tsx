@@ -3,8 +3,8 @@ import { CoinCard, useCoinsQuery } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { AddToFavoritesButton } from '@/features/add-to-favorites'
 import { formatCompactNumber, formatPrice } from '@/shared/lib'
-import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
+import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 
 export function HomePage() {
   const currency = useCurrencyStore((state) => state.currency)
@@ -65,12 +65,11 @@ export function HomePage() {
         {isLoading ? <p className="text-slate-400">Loading market data…</p> : null}
 
         {isError ? (
-          <Card className="space-y-3 p-5">
-            <p className="text-sm text-rose-300">{error instanceof Error ? error.message : 'Unable to load market data.'}</p>
-            <Button type="button" variant="secondary" onClick={() => refetch()}>
-              Retry
-            </Button>
-          </Card>
+          <QueryErrorState
+            error={error}
+            fallbackMessage="Unable to load market data."
+            onRetry={() => refetch()}
+          />
         ) : null}
 
         {!isLoading && !isError && data.length === 0 ? (

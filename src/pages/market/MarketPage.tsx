@@ -4,8 +4,9 @@ import { useCoinsQuery } from '@/entities/coin'
 import type { Coin } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { MARKET_PAGE_SIZE } from '@/shared/config'
-import { Button } from '@/shared/ui/Button'
+import type { CurrencyCode } from '@/shared/config'
 import { Card } from '@/shared/ui/Card'
+import { QueryErrorState } from '@/shared/ui/QueryErrorState'
 
 function mergeCoins(previous: Coin[], current: Coin[]): Coin[] {
   const nextMap = new Map(previous.map((coin) => [coin.id, coin]))
@@ -17,6 +18,15 @@ function mergeCoins(previous: Coin[], current: Coin[]): Coin[] {
 
 export function MarketPage() {
   const currency = useCurrencyStore((state) => state.currency)
+
+  return <MarketContent key={currency} currency={currency} />
+}
+
+interface MarketContentProps {
+  currency: CurrencyCode
+}
+
+function MarketContent({ currency }: MarketContentProps) {
   const [page, setPage] = useState(1)
   const [loadedCoins, setLoadedCoins] = useState<Coin[]>([])
 
@@ -38,7 +48,7 @@ export function MarketPage() {
   }
 
   return (
-    <section key={currency} className="space-y-6 py-6">
+    <section className="space-y-6 py-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-white">Market</h1>
         <p className="max-w-2xl text-slate-400">
@@ -49,12 +59,11 @@ export function MarketPage() {
       {isLoading && page === 1 ? <p className="text-slate-400">Loading market data…</p> : null}
 
       {isError ? (
-        <Card className="space-y-3 p-5">
-          <p className="text-sm text-rose-300">{error instanceof Error ? error.message : 'Unable to load market data.'}</p>
-          <Button type="button" variant="secondary" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </Card>
+        <QueryErrorState
+          error={error}
+          fallbackMessage="Unable to load market data."
+          onRetry={() => refetch()}
+        />
       ) : null}
 
       {!isLoading && !isError && visibleCoins.length === 0 ? (

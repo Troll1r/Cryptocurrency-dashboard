@@ -1,5 +1,6 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { ChartPeriod, ChartPoint, CurrencyCode } from '@/entities/coin'
+import { CHART_PERIODS } from '@/shared/config'
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
 import { formatXAxisTick } from './lib/formatXAxisTick'
@@ -10,12 +11,6 @@ export interface PriceChartProps {
   activePeriod: ChartPeriod
   onPeriodChange: (period: ChartPeriod) => void
 }
-
-const periodLabels: Array<{ value: ChartPeriod; label: string }> = [
-  { value: '24h', label: '24h' },
-  { value: '7d', label: '7d' },
-  { value: '30d', label: '30d' },
-]
 
 function formatTooltipValue(value: number | string | readonly (number | string)[] | undefined, currency: CurrencyCode): string {
   const numericValue = Array.isArray(value) ? Number(value[0]) : Number(value)
@@ -37,18 +32,18 @@ export function PriceChart({ data, currency, activePeriod, onPeriodChange }: Pri
         </div>
 
         <div className="flex rounded-lg border border-slate-700 bg-slate-950/80 p-1">
-          {periodLabels.map(({ value, label }) => (
+          {CHART_PERIODS.map(({ id, label }) => (
             <button
-              key={value}
+              key={id}
               type="button"
-              onClick={() => onPeriodChange(value)}
+              onClick={() => onPeriodChange(id)}
               className={[
                 'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                activePeriod === value
+                activePeriod === id
                   ? 'bg-sky-400 text-slate-950'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white',
               ].join(' ')}
-              aria-pressed={activePeriod === value}
+              aria-pressed={activePeriod === id}
             >
               {label}
             </button>
