@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ConverterPage } from './ConverterPage'
 
 const useCoinsQueryMock = vi.fn()
+const useCoinSearchQueryMock = vi.fn()
 
 vi.mock('@/entities/coin', async () => {
   const actual = await vi.importActual<typeof import('@/entities/coin')>('@/entities/coin')
@@ -10,6 +11,7 @@ vi.mock('@/entities/coin', async () => {
   return {
     ...actual,
     useCoinsQuery: (...args: unknown[]) => useCoinsQueryMock(...args),
+    useCoinSearchQuery: (...args: unknown[]) => useCoinSearchQueryMock(...args),
   }
 })
 
@@ -23,6 +25,10 @@ describe('ConverterPage', () => {
   })
 
   beforeEach(() => {
+    useCoinSearchQueryMock.mockReturnValue({
+      data: [],
+      isFetching: false,
+    })
     useCoinsQueryMock.mockReturnValue({
       data: [
         {
@@ -67,10 +73,8 @@ describe('ConverterPage', () => {
     renderPage()
 
     expect(screen.getByRole('heading', { name: 'Cryptocurrency Converter' })).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toBeInTheDocument()
-    expect(screen.getAllByText('Bitcoin (BTC)')).toHaveLength(2)
-    expect(screen.getAllByText('Ethereum (ETH)')).toHaveLength(2)
+    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toHaveValue('Bitcoin (BTC)')
+    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toHaveValue('Ethereum (ETH)')
   })
 
   it('shows loading state', () => {

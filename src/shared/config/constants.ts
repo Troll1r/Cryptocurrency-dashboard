@@ -28,6 +28,8 @@ export const CHART_PERIODS = [
 export type ChartPeriod = (typeof CHART_PERIODS)[number]['id']
 
 export const API_REQUEST_TIMEOUT_MS = 10_000
+export const COIN_SEARCH_DEBOUNCE_MS = 300
+export const COIN_SEARCH_MIN_QUERY_LENGTH = 2
 export const COINGECKO_API_BASE_URL = (
   getEnvironmentValue('VITE_COINGECKO_API_BASE_URL') ?? DEFAULT_COINGECKO_API_BASE_URL
 ).replace(/\/+$/, '')

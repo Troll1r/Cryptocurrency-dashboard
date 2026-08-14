@@ -10,7 +10,7 @@ vi.mock('@/shared/api', () => ({
   },
 }))
 
-import { getCoinsMarkets, getMarketChart } from './coinApi'
+import { getCoinsMarkets, getMarketChart, searchCoins } from './coinApi'
 
 describe('getCoinsMarkets', () => {
   beforeEach(() => {
@@ -97,6 +97,50 @@ describe('getCoinsMarkets', () => {
         ids: 'coin-251',
       },
     })
+  })
+})
+
+describe('searchCoins', () => {
+  beforeEach(() => {
+    mocks.get.mockReset()
+  })
+
+  it('maps search matches across all coins', async () => {
+    mocks.get.mockResolvedValue({
+      data: {
+        coins: [
+          {
+            id: 'dogwifhat',
+            name: 'dogwifhat',
+            symbol: 'wif',
+            market_cap_rank: 220,
+            thumb: 'https://example.com/dogwifhat-thumb.png',
+            large: 'https://example.com/dogwifhat-large.png',
+          },
+        ],
+      },
+    })
+
+    await expect(searchCoins('dogwifhat')).resolves.toEqual([
+      {
+        id: 'dogwifhat',
+        name: 'dogwifhat',
+        symbol: 'wif',
+        marketCapRank: 220,
+        thumb: 'https://example.com/dogwifhat-thumb.png',
+        large: 'https://example.com/dogwifhat-large.png',
+      },
+    ])
+
+    expect(mocks.get).toHaveBeenCalledWith('/search', {
+      params: { query: 'dogwifhat' },
+    })
+  })
+
+  it('does not request anything for an empty query', async () => {
+    await expect(searchCoins('   ')).resolves.toEqual([])
+
+    expect(mocks.get).not.toHaveBeenCalled()
   })
 })
 

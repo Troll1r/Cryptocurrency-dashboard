@@ -4,6 +4,7 @@ import { formatChartData } from '@/shared/lib'
 import type {
   ChartPoint,
   Coin,
+  CoinSearchResult,
   CoinsMarketsRequest,
   MarketChartRequest,
 } from '@/entities/coin/model/types'
@@ -26,6 +27,19 @@ interface CoinMarketResponse {
 
 interface MarketChartResponse {
   prices: readonly (readonly [number, number])[]
+}
+
+interface CoinSearchResponse {
+  coins: readonly CoinSearchItem[]
+}
+
+interface CoinSearchItem {
+  id: string
+  name: string
+  symbol: string
+  market_cap_rank: number | null
+  thumb: string
+  large: string
 }
 
 function mapCoin(response: CoinMarketResponse): Coin {
@@ -129,4 +143,25 @@ export async function getMarketChart({
   )
 
   return formatChartData(data.prices)
+}
+
+export async function searchCoins(query: string): Promise<CoinSearchResult[]> {
+  const normalizedQuery = query.trim()
+
+  if (!normalizedQuery) {
+    return []
+  }
+
+  const { data } = await axiosInstance.get<CoinSearchResponse>('/search', {
+    params: { query: normalizedQuery },
+  })
+
+  return data.coins.map((coin) => ({
+    id: coin.id,
+    name: coin.name,
+    symbol: coin.symbol,
+    marketCapRank: coin.market_cap_rank,
+    thumb: coin.thumb,
+    large: coin.large,
+  }))
 }

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import type { Coin } from '@/entities/coin'
+import type { Coin, CoinSearchResult } from '@/entities/coin'
+import { useCoinsQuery } from '@/entities/coin'
 import type { CurrencyCode } from '@/shared/config'
 import { useTranslation } from '@/shared/i18n'
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
-import { Select } from '@/shared/ui/Select'
+import { CoinSelect } from './CoinSelect'
 
 export interface CurrencyConverterProps {
   coin?: Coin
@@ -18,25 +19,68 @@ function formatCoinAmount(value: number, locale: string): string {
   }).format(value)
 }
 
+function metaToCoin(meta: CoinSearchResult): Coin {
+  return {
+    id: meta.id,
+    symbol: meta.symbol,
+    name: meta.name,
+    image: meta.large,
+    currentPrice: null,
+    marketCap: null,
+    marketCapRank: meta.marketCapRank,
+    totalVolume: null,
+    high24h: null,
+    low24h: null,
+    priceChange24h: null,
+    priceChangePercentage24h: null,
+    lastUpdated: '',
+  }
+}
+
 export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConverterProps) {
   const [amount, setAmount] = useState('1')
   const [selectedSourceCoinId, setSelectedSourceCoinId] = useState(coin?.id ?? '')
   const [selectedTargetCoinId, setSelectedTargetCoinId] = useState('')
+  const [extraCoinMeta, setExtraCoinMeta] = useState<Record<string, CoinSearchResult>>({})
   const { locale, t } = useTranslation()
+
+  const loadedCoinIds = useMemo(() => new Set(coins.map((loadedCoin) => loadedCoin.id)), [coins])
+  const extraCoinIds = useMemo(
+    () => Object.keys(extraCoinMeta).filter((id) => !loadedCoinIds.has(id)),
+    [extraCoinMeta, loadedCoinIds],
+  )
+  const { data: fetchedExtraCoins = [] } = useCoinsQuery({ currency, ids: extraCoinIds })
+
+  const knownCoins = useMemo(() => {
+    const map = new Map(coins.map((loadedCoin) => [loadedCoin.id, loadedCoin]))
+
+    extraCoinIds.forEach((id) => {
+      const meta = extraCoinMeta[id]
+
+      if (meta && !map.has(id)) {
+        map.set(id, metaToCoin(meta))
+      }
+    })
+
+    fetchedExtraCoins.forEach((extraCoin) => map.set(extraCoin.id, extraCoin))
+
+    return [...map.values()]
+  }, [coins, extraCoinIds, extraCoinMeta, fetchedExtraCoins])
+
   const sourceCoinId =
     coin?.id ??
-    (coins.some(({ id }) => id === selectedSourceCoinId)
+    (knownCoins.some(({ id }) => id === selectedSourceCoinId)
       ? selectedSourceCoinId
-      : coins[0]?.id ?? '')
+      : knownCoins[0]?.id ?? '')
   const targetCoinId =
     coin
       ? ''
-      : coins.some(({ id }) => id === selectedTargetCoinId && id !== sourceCoinId)
+      : knownCoins.some(({ id }) => id === selectedTargetCoinId && id !== sourceCoinId)
         ? selectedTargetCoinId
-        : coins.find(({ id }) => id !== sourceCoinId)?.id ?? ''
+        : knownCoins.find(({ id }) => id !== sourceCoinId)?.id ?? ''
 
-  const selectedSourceCoin = coin ?? coins.find((candidate) => candidate.id === sourceCoinId)
-  const selectedTargetCoin = coin ? undefined : coins.find((candidate) => candidate.id === targetCoinId)
+  const selectedSourceCoin = coin ?? knownCoins.find((candidate) => candidate.id === sourceCoinId)
+  const selectedTargetCoin = coin ? undefined : knownCoins.find((candidate) => candidate.id === targetCoinId)
 
   const parsedAmount = useMemo(() => {
     const normalized = amount.replace(/,/g, '.')
@@ -51,6 +95,9 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
   const isValidAmount = Number.isFinite(parsedAmount) && parsedAmount > 0
   const sourceCoinPrice = selectedSourceCoin?.currentPrice ?? 0
   const targetCoinPrice = selectedTargetCoin?.currentPrice ?? 0
+  const isPriceLoading =
+    (extraCoinIds.includes(sourceCoinId) && selectedSourceCoin?.currentPrice == null) ||
+    (!coin && extraCoinIds.includes(targetCoinId) && selectedTargetCoin?.currentPrice == null)
   const convertedCurrencyValue = isValidAmount && selectedSourceCoin ? parsedAmount * sourceCoinPrice : 0
   const convertedCoinValue =
     isValidAmount && selectedSourceCoin && selectedTargetCoin && targetCoinPrice > 0
@@ -62,6 +109,22 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
 
     if (nextValue === '' || /^\d*[.,]?\d*$/.test(nextValue)) {
       setAmount(nextValue)
+    }
+  }
+
+  function handleSourceChange(coinId: string, meta: CoinSearchResult | undefined) {
+    setSelectedSourceCoinId(coinId)
+
+    if (meta) {
+      setExtraCoinMeta((previous) => ({ ...previous, [coinId]: meta }))
+    }
+  }
+
+  function handleTargetChange(coinId: string, meta: CoinSearchResult | undefined) {
+    setSelectedTargetCoinId(coinId)
+
+    if (meta) {
+      setExtraCoinMeta((previous) => ({ ...previous, [coinId]: meta }))
     }
   }
 
@@ -84,37 +147,21 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
       <div className="mt-4 space-y-4">
         {showCoinSelect ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm text-slate-300">
-              <span className="mb-2 block">{t('converter.fromCoin')}</span>
-              <Select
-                value={sourceCoinId}
-                onChange={(event) => setSelectedSourceCoinId(event.target.value)}
-                className="w-full bg-slate-950 text-white"
-                aria-label={t('converter.selectSource')}
-              >
-                {coins.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.symbol.toUpperCase()})
-                  </option>
-                ))}
-              </Select>
-            </label>
-
-            <label className="block text-sm text-slate-300">
-              <span className="mb-2 block">{t('converter.toCoin')}</span>
-              <Select
-                value={targetCoinId}
-                onChange={(event) => setSelectedTargetCoinId(event.target.value)}
-                className="w-full bg-slate-950 text-white"
-                aria-label={t('converter.selectTarget')}
-              >
-                {coins.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.symbol.toUpperCase()})
-                  </option>
-                ))}
-              </Select>
-            </label>
+            <CoinSelect
+              label={t('converter.fromCoin')}
+              ariaLabel={t('converter.selectSource')}
+              value={sourceCoinId}
+              onChange={handleSourceChange}
+              coins={knownCoins}
+            />
+            <CoinSelect
+              label={t('converter.toCoin')}
+              ariaLabel={t('converter.selectTarget')}
+              value={targetCoinId}
+              onChange={handleTargetChange}
+              coins={knownCoins}
+              excludeCoinId={sourceCoinId}
+            />
           </div>
         ) : null}
 
@@ -139,11 +186,13 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
                 ? isValidAmount
                   ? formatPrice(convertedCurrencyValue, currency, locale)
                   : t('converter.enterValidAmount')
-                : canConvertToCoin
-                  ? `${formatCoinAmount(convertedCoinValue, locale)} ${selectedTargetCoin.symbol.toUpperCase()}`
-                  : isValidAmount
-                    ? t('converter.selectValidTarget')
-                    : t('converter.enterValidAmount')}
+                : isPriceLoading
+                  ? t('converter.loadingPrice')
+                  : canConvertToCoin
+                    ? `${formatCoinAmount(convertedCoinValue, locale)} ${selectedTargetCoin.symbol.toUpperCase()}`
+                    : isValidAmount
+                      ? t('converter.selectValidTarget')
+                      : t('converter.enterValidAmount')}
             </p>
             <p className="mt-2 text-sm text-slate-400">
               {t('converter.price', {

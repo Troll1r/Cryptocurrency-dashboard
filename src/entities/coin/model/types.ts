@@ -22,6 +22,15 @@ export interface ChartPoint {
   price: number
 }
 
+export interface CoinSearchResult {
+  id: string
+  name: string
+  symbol: string
+  marketCapRank: number | null
+  thumb: string
+  large: string
+}
+
 export interface CoinsMarketsRequest {
   currency: CurrencyCode
   page?: number

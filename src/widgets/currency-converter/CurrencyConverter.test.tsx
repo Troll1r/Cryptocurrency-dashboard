@@ -1,7 +1,20 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CurrencyConverter } from './CurrencyConverter'
+
+const useCoinsQueryMock = vi.fn()
+const useCoinSearchQueryMock = vi.fn()
+
+vi.mock('@/entities/coin', async () => {
+  const actual = await vi.importActual<typeof import('@/entities/coin')>('@/entities/coin')
+
+  return {
+    ...actual,
+    useCoinsQuery: (...args: unknown[]) => useCoinsQueryMock(...args),
+    useCoinSearchQuery: (...args: unknown[]) => useCoinSearchQueryMock(...args),
+  }
+})
 
 const mockCoin = {
   id: 'bitcoin',
@@ -27,9 +40,31 @@ const mockEthereum = {
   currentPrice: 3000,
 }
 
+const mockDogwifhat = {
+  ...mockCoin,
+  id: 'dogwifhat',
+  symbol: 'wif',
+  name: 'Dogwifhat',
+  currentPrice: 2.5,
+}
+
 describe('CurrencyConverter', () => {
   afterEach(() => {
     cleanup()
+  })
+
+  beforeEach(() => {
+    useCoinsQueryMock.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    useCoinSearchQueryMock.mockReturnValue({
+      data: [],
+      isFetching: false,
+    })
   })
 
   it('renders with fixed coin and default amount', () => {
@@ -72,13 +107,17 @@ describe('CurrencyConverter', () => {
     expect(screen.getByText('Enter a valid positive amount')).toBeInTheDocument()
   })
 
-  it('renders coin selection when coins array is provided', () => {
+  it('renders coin selection when coins array is provided', async () => {
+    const user = userEvent.setup()
     render(<CurrencyConverter coins={[mockCoin, mockEthereum]} currency="usd" />)
 
-    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toBeInTheDocument()
-    expect(screen.getAllByText('Bitcoin (BTC)')).toHaveLength(2)
-    expect(screen.getAllByText('Ethereum (ETH)')).toHaveLength(2)
+    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toHaveValue('Bitcoin (BTC)')
+    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toHaveValue('Ethereum (ETH)')
+
+    await user.click(screen.getByRole('combobox', { name: 'Select source cryptocurrency' }))
+
+    expect(screen.getByRole('option', { name: 'Bitcoin (BTC)' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Ethereum (ETH)' })).toBeInTheDocument()
   })
 
   it('converts from one coin to another and updates when selection changes', async () => {
@@ -88,10 +127,45 @@ describe('CurrencyConverter', () => {
     expect(screen.getByText('16.66666667 ETH')).toBeInTheDocument()
 
     const sourceSelect = screen.getByRole('combobox', { name: 'Select source cryptocurrency' })
-    await user.selectOptions(sourceSelect, 'ethereum')
+    await user.click(sourceSelect)
+    await user.click(screen.getByRole('option', { name: 'Ethereum (ETH)' }))
 
     expect(screen.getByText('Convert Ethereum')).toBeInTheDocument()
     expect(screen.getByText('0.06 BTC')).toBeInTheDocument()
+  })
+
+  it('allows selecting a coin beyond the loaded list via search', async () => {
+    const user = userEvent.setup()
+    useCoinSearchQueryMock.mockReturnValue({
+      data: [
+        {
+          id: 'dogwifhat',
+          name: 'Dogwifhat',
+          symbol: 'wif',
+          marketCapRank: 220,
+          thumb: 'https://example.com/dogwifhat-thumb.png',
+          large: 'https://example.com/dogwifhat-large.png',
+        },
+      ],
+      isFetching: false,
+    })
+    useCoinsQueryMock.mockImplementation((options: { ids?: readonly string[] }) => ({
+      data: options.ids?.includes('dogwifhat') ? [mockDogwifhat] : [],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    }))
+
+    render(<CurrencyConverter coins={[mockCoin, mockEthereum]} currency="usd" />)
+
+    const sourceSelect = screen.getByRole('combobox', { name: 'Select source cryptocurrency' })
+    await user.click(sourceSelect)
+    await user.type(sourceSelect, 'dog')
+    await user.click(screen.getByRole('option', { name: 'Dogwifhat (WIF)' }))
+
+    expect(screen.getByText('Convert Dogwifhat')).toBeInTheDocument()
+    expect(screen.getByText('0.00005 BTC')).toBeInTheDocument()
   })
 
   it('shows no coin message when no coins are available', () => {
@@ -105,8 +179,8 @@ describe('CurrencyConverter', () => {
 
     rerender(<CurrencyConverter coins={[mockCoin, mockEthereum]} currency="usd" />)
 
-    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toHaveValue('bitcoin')
-    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toHaveValue('ethereum')
+    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toHaveValue('Bitcoin (BTC)')
+    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toHaveValue('Ethereum (ETH)')
     expect(screen.getByRole('heading', { name: 'Convert Bitcoin' })).toBeInTheDocument()
   })
 })
