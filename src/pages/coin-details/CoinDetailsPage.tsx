@@ -75,12 +75,14 @@ export function CoinDetailsPage() {
         <p className="text-slate-400">
           {marketError instanceof Error ? marketError.message : 'Unable to load this coin right now.'}
         </p>
-        <Button type="button" variant="secondary" onClick={() => refetchMarket()}>
-          Retry
-        </Button>
-        <Link to="/market" className="text-sm font-medium text-sky-400 hover:text-sky-300">
-          Back to market
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Button type="button" variant="secondary" onClick={() => refetchMarket()}>
+            Retry
+          </Button>
+          <Link to="/market" className="text-sm font-medium text-sky-400 hover:text-sky-300">
+            Back to market
+          </Link>
+        </div>
       </section>
     )
   }
