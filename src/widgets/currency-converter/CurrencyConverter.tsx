@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Coin } from '@/entities/coin'
 import type { CurrencyCode } from '@/shared/config'
+import { useTranslation } from '@/shared/i18n'
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
 import { Select } from '@/shared/ui/Select'
@@ -11,8 +12,8 @@ export interface CurrencyConverterProps {
   currency: CurrencyCode
 }
 
-function formatCoinAmount(value: number): string {
-  return new Intl.NumberFormat('en-US', {
+function formatCoinAmount(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     maximumFractionDigits: 8,
   }).format(value)
 }
@@ -21,6 +22,7 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
   const [amount, setAmount] = useState('1')
   const [selectedSourceCoinId, setSelectedSourceCoinId] = useState(coin?.id ?? '')
   const [selectedTargetCoinId, setSelectedTargetCoinId] = useState('')
+  const { locale, t } = useTranslation()
   const sourceCoinId =
     coin?.id ??
     (coins.some(({ id }) => id === selectedSourceCoinId)
@@ -76,19 +78,19 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
   return (
     <Card className="p-5">
       <h2 className="text-xl font-semibold text-white">
-        {selectedSourceCoin ? `Convert ${selectedSourceCoin.name}` : 'Currency Converter'}
+        {selectedSourceCoin ? t('converter.convert', { name: selectedSourceCoin.name }) : t('converter.title')}
       </h2>
 
       <div className="mt-4 space-y-4">
         {showCoinSelect ? (
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-sm text-slate-300">
-              <span className="mb-2 block">From coin</span>
+              <span className="mb-2 block">{t('converter.fromCoin')}</span>
               <Select
                 value={sourceCoinId}
                 onChange={(event) => setSelectedSourceCoinId(event.target.value)}
                 className="w-full bg-slate-950 text-white"
-                aria-label="Select source cryptocurrency"
+                aria-label={t('converter.selectSource')}
               >
                 {coins.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -99,12 +101,12 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
             </label>
 
             <label className="block text-sm text-slate-300">
-              <span className="mb-2 block">To coin</span>
+              <span className="mb-2 block">{t('converter.toCoin')}</span>
               <Select
                 value={targetCoinId}
                 onChange={(event) => setSelectedTargetCoinId(event.target.value)}
                 className="w-full bg-slate-950 text-white"
-                aria-label="Select target cryptocurrency"
+                aria-label={t('converter.selectTarget')}
               >
                 {coins.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -117,42 +119,45 @@ export function CurrencyConverter({ coin, coins = [], currency }: CurrencyConver
         ) : null}
 
         <label className="block text-sm text-slate-300">
-          <span className="mb-2 block">Amount</span>
+          <span className="mb-2 block">{t('converter.amount')}</span>
           <input
             type="text"
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
             className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
-            placeholder="Enter amount"
-            aria-label={selectedSourceCoin ? `Amount of ${selectedSourceCoin.name}` : 'Amount'}
+            placeholder={t('converter.enterAmount')}
+            aria-label={t('converter.amount')}
           />
         </label>
 
         {selectedSourceCoin ? (
           <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <p className="text-sm text-slate-400">Converted total</p>
+            <p className="text-sm text-slate-400">{t('converter.convertedTotal')}</p>
             <p className="mt-2 text-2xl font-bold text-white">
               {coin
                 ? isValidAmount
-                  ? formatPrice(convertedCurrencyValue, currency)
-                  : 'Enter a valid positive amount'
+                  ? formatPrice(convertedCurrencyValue, currency, locale)
+                  : t('converter.enterValidAmount')
                 : canConvertToCoin
-                  ? `${formatCoinAmount(convertedCoinValue)} ${selectedTargetCoin.symbol.toUpperCase()}`
+                  ? `${formatCoinAmount(convertedCoinValue, locale)} ${selectedTargetCoin.symbol.toUpperCase()}`
                   : isValidAmount
-                    ? 'Select a valid target coin'
-                    : 'Enter a valid positive amount'}
+                    ? t('converter.selectValidTarget')
+                    : t('converter.enterValidAmount')}
             </p>
             <p className="mt-2 text-sm text-slate-400">
-              {selectedSourceCoin.symbol.toUpperCase()} price: {formatPrice(selectedSourceCoin.currentPrice, currency)}
+              {t('converter.price', {
+                symbol: selectedSourceCoin.symbol.toUpperCase(),
+                price: formatPrice(selectedSourceCoin.currentPrice, currency, locale),
+              })}
             </p>
             {!coin && canConvertToCoin ? (
-              <p className="mt-1 text-sm text-slate-400">≈ {formatPrice(convertedCurrencyValue, currency)}</p>
+              <p className="mt-1 text-sm text-slate-400">≈ {formatPrice(convertedCurrencyValue, currency, locale)}</p>
             ) : null}
           </div>
         ) : (
           <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-center text-slate-400">
-            No coin selected
+            {t('converter.noCoinSelected')}
           </div>
         )}
       </div>

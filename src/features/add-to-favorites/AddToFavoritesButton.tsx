@@ -1,4 +1,5 @@
 import { useFavoritesStore } from '@/entities/coin'
+import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/Button'
 
 export interface AddToFavoritesButtonProps {
@@ -9,7 +10,8 @@ export interface AddToFavoritesButtonProps {
 export function AddToFavoritesButton({ coinId, coinName }: AddToFavoritesButtonProps) {
   const isFavorite = useFavoritesStore((state) => state.isFavorite(coinId))
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite)
-  const label = isFavorite ? `Remove ${coinName} from favorites` : `Add ${coinName} to favorites`
+  const { t } = useTranslation()
+  const label = t(isFavorite ? 'favorite.remove' : 'favorite.add', { name: coinName })
 
   return (
     <Button

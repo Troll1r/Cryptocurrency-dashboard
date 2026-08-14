@@ -38,7 +38,7 @@ export function Layout() {
               <CurrencySwitcher />
             </div>
           </div>
-          <nav aria-label="Primary navigation" className="flex gap-1 overflow-x-auto pb-1 xl:order-2 xl:pb-0">
+          <nav aria-label={t('nav.primary')} className="flex gap-1 overflow-x-auto pb-1 xl:order-2 xl:pb-0">
             {navigationItems.map(({ to, translationKey, end }) => (
               <NavLink key={to} to={to} end={end} className={({ isActive }) => getLinkClassName(isActive)}>
                 {t(translationKey)}

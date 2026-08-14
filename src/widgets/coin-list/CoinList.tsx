@@ -3,6 +3,7 @@ import { CoinCard } from '@/entities/coin'
 import type { Coin } from '@/entities/coin'
 import { AddToFavoritesButton } from '@/features/add-to-favorites'
 import type { CurrencyCode } from '@/shared/config'
+import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
 import { Select } from '@/shared/ui/Select'
@@ -16,12 +17,6 @@ export interface CoinListProps {
 }
 
 type SortKey = 'market_cap' | 'price' | 'change'
-
-const sortOptions: Array<{ value: SortKey; label: string }> = [
-  { value: 'market_cap', label: 'Market cap' },
-  { value: 'price', label: 'Price' },
-  { value: 'change', label: '24h change' },
-]
 
 function sortCoins(coins: Coin[], sortKey: SortKey): Coin[] {
   return [...coins].sort((left, right) => {
@@ -46,6 +41,12 @@ export function CoinList({
 }: CoinListProps) {
   const [query, setQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortKey>('market_cap')
+  const { t } = useTranslation()
+  const sortOptions: Array<{ value: SortKey; label: string }> = [
+    { value: 'market_cap', label: t('list.sortMarketCap') },
+    { value: 'price', label: t('list.sortPrice') },
+    { value: 'change', label: t('list.sortChange') },
+  ]
 
   const visibleCoins = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -61,27 +62,27 @@ export function CoinList({
 
   const showLoadMoreButton = Boolean(onLoadMore)
   const isLoadMoreDisabled = !hasNextPage || isLoadingMore
-  const loadMoreLabel = isLoadingMore ? 'Loading more' : 'Show more'
+  const loadMoreLabel = isLoadingMore ? t('action.loadingMore') : t('action.showMore')
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <label className="relative block flex-1">
-          <span className="sr-only">Search coins</span>
+          <span className="sr-only">{t('list.search')}</span>
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Search coins"
-            placeholder="Search coins"
+            aria-label={t('list.search')}
+            placeholder={t('list.search')}
             className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
           />
         </label>
 
         <label className="flex items-center gap-2 text-sm text-slate-300">
-          <span>Sort by</span>
+          <span>{t('list.sortBy')}</span>
           <Select
-            aria-label="Sort by"
+            aria-label={t('list.sortBy')}
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as SortKey)}
             className="text-white"
@@ -97,7 +98,7 @@ export function CoinList({
 
       {visibleCoins.length === 0 ? (
         <Card className="p-6 text-center text-slate-300">
-          <p>No coins match your search.</p>
+          <p>{t('list.noMatch')}</p>
         </Card>
       ) : (
         <div className="space-y-3">

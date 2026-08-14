@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { Coin } from '../model/types'
 import { formatCompactNumber, formatPrice } from '@/shared/lib'
 import type { CurrencyCode } from '@/shared/config'
+import { useTranslation } from '@/shared/i18n'
 import { Card } from '@/shared/ui/Card'
 
 export interface CoinCardProps {
@@ -27,6 +28,7 @@ function getPriceChangeDisplay(change: number | null): { label: string; toneClas
 export function CoinCard({ coin, currency, action }: CoinCardProps) {
   const priceChange = getPriceChangeDisplay(coin.priceChangePercentage24h)
   const rankLabel = coin.marketCapRank ?? '—'
+  const { locale, t } = useTranslation()
 
   return (
     <Card className="p-0">
@@ -38,7 +40,7 @@ export function CoinCard({ coin, currency, action }: CoinCardProps) {
           <span className="w-8 shrink-0 text-center text-sm font-semibold text-slate-500">{rankLabel}</span>
           <img
             src={coin.image}
-            alt={`${coin.name} logo`}
+            alt={t('coin.logo', { name: coin.name })}
             width={40}
             height={40}
             className="size-10 shrink-0 rounded-full bg-slate-800 object-cover"
@@ -49,13 +51,13 @@ export function CoinCard({ coin, currency, action }: CoinCardProps) {
               <span className="text-sm font-medium text-slate-400">{coin.symbol.toUpperCase()}</span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-              <span className="font-semibold text-white">{formatPrice(coin.currentPrice, currency)}</span>
+              <span className="font-semibold text-white">{formatPrice(coin.currentPrice, currency, locale)}</span>
               <span className={priceChange.toneClass}>
                 {priceChange.label}
-                <span className="sr-only">24 hour change</span>
+                <span className="sr-only">{t('coin.priceChange24h')}</span>
               </span>
               <span className="text-slate-400">
-                MCap {formatCompactNumber(coin.marketCap)}
+                {t('coin.marketCap')} {formatCompactNumber(coin.marketCap, locale)}
               </span>
             </div>
           </div>

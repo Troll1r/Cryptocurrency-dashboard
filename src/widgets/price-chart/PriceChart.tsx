@@ -1,6 +1,7 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { ChartPeriod, ChartPoint, CurrencyCode } from '@/entities/coin'
 import { CHART_PERIODS } from '@/shared/config'
+import { useTranslation } from '@/shared/i18n'
 import { formatPrice } from '@/shared/lib'
 import { Card } from '@/shared/ui/Card'
 import { formatXAxisTick } from './lib/formatXAxisTick'
@@ -12,23 +13,29 @@ export interface PriceChartProps {
   onPeriodChange: (period: ChartPeriod) => void
 }
 
-function formatTooltipValue(value: number | string | readonly (number | string)[] | undefined, currency: CurrencyCode): string {
+function formatTooltipValue(
+  value: number | string | readonly (number | string)[] | undefined,
+  currency: CurrencyCode,
+  locale: string,
+): string {
   const numericValue = Array.isArray(value) ? Number(value[0]) : Number(value)
 
   if (!Number.isFinite(numericValue)) {
     return '—'
   }
 
-  return formatPrice(numericValue, currency)
+  return formatPrice(numericValue, currency, locale)
 }
 
 export function PriceChart({ data, currency, activePeriod, onPeriodChange }: PriceChartProps) {
+  const { locale, t } = useTranslation()
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Price history</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Chart</h2>
+          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">{t('chart.priceHistory')}</p>
+          <h2 className="mt-2 text-xl font-semibold text-white">{t('chart.title')}</h2>
         </div>
 
         <div className="flex rounded-lg border border-slate-700 bg-slate-950/80 p-1">
@@ -53,7 +60,7 @@ export function PriceChart({ data, currency, activePeriod, onPeriodChange }: Pri
 
       {data.length === 0 ? (
         <div className="flex min-h-64 items-center justify-center rounded-xl border border-dashed border-slate-700 text-slate-400">
-          No chart data available.
+          {t('chart.noData')}
         </div>
       ) : (
         <div className="h-72 w-full">
@@ -77,7 +84,7 @@ export function PriceChart({ data, currency, activePeriod, onPeriodChange }: Pri
                 stroke="#94a3b8"
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => formatPrice(Number(value), currency, 'en-US')}
+                tickFormatter={(value) => formatPrice(Number(value), currency, locale)}
                 width={84}
               />
               <Tooltip
@@ -86,8 +93,8 @@ export function PriceChart({ data, currency, activePeriod, onPeriodChange }: Pri
                   border: '1px solid #334155',
                   borderRadius: '0.75rem',
                 }}
-                formatter={(value) => [formatTooltipValue(value, currency), 'Price']}
-                labelFormatter={(value) => new Date(Number(value)).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                formatter={(value) => [formatTooltipValue(value, currency, locale), t('chart.price')]}
+                labelFormatter={(value) => new Date(Number(value)).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })}
               />
               <Area type="monotone" dataKey="price" stroke="#38bdf8" strokeWidth={2} fill="url(#priceFill)" />
             </AreaChart>

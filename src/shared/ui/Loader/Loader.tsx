@@ -1,3 +1,5 @@
+import { useTranslation } from '@/shared/i18n'
+
 export interface LoaderProps {
   label?: string
   size?: 'sm' | 'md' | 'lg'
@@ -9,11 +11,14 @@ const sizeClassNames = {
   lg: 'size-8 border-[3px]',
 } as const
 
-export function Loader({ label = 'Loading', size = 'md' }: LoaderProps) {
+export function Loader({ label, size = 'md' }: LoaderProps) {
+  const { t } = useTranslation()
+  const resolvedLabel = label ?? t('loader.loading')
+
   return (
-    <div role="status" aria-label={label} className="inline-flex items-center justify-center">
+    <div role="status" aria-label={resolvedLabel} className="inline-flex items-center justify-center">
       <span aria-hidden="true" className={`${sizeClassNames[size]} animate-spin rounded-full border-sky-400 border-r-transparent`} />
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{resolvedLabel}</span>
     </div>
   )
 }

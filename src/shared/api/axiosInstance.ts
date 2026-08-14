@@ -4,6 +4,7 @@ import {
   COINGECKO_API_BASE_URL,
   COINGECKO_API_KEY,
 } from '@/shared/config'
+import { translate, useLanguageStore } from '@/shared/i18n'
 
 export class ApiError extends Error {
   readonly status: number | undefined
@@ -30,19 +31,21 @@ function getResponseMessage(data: unknown): string | undefined {
 }
 
 function getDefaultErrorMessage(status: number | undefined): string {
+  const language = useLanguageStore.getState().language
+
   if (status === 401 || status === 403) {
-    return 'CoinGecko API key is missing or invalid.'
+    return translate(language, 'error.apiKeyInvalid')
   }
 
   if (status === 429) {
-    return 'CoinGecko request limit has been reached. Please try again shortly.'
+    return translate(language, 'error.rateLimited')
   }
 
   if (status) {
-    return 'CoinGecko could not complete the request.'
+    return translate(language, 'error.requestFailed')
   }
 
-  return 'Unable to connect to CoinGecko. Please check your network connection.'
+  return translate(language, 'error.network')
 }
 
 export function toApiError(error: unknown): ApiError {
@@ -51,7 +54,9 @@ export function toApiError(error: unknown): ApiError {
   }
 
   if (!axios.isAxiosError(error)) {
-    return new ApiError('An unexpected error occurred while requesting market data.')
+    const language = useLanguageStore.getState().language
+
+    return new ApiError(translate(language, 'error.unexpected'))
   }
 
   const status = error.response?.status
