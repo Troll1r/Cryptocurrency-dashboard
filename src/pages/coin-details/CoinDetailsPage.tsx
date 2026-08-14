@@ -14,7 +14,9 @@ import { PriceChart } from '@/widgets/price-chart'
 export function CoinDetailsPage() {
   const { id } = useParams()
   const currency = useCurrencyStore((state) => state.currency)
-  const [activePeriod, setActivePeriod] = useState<(typeof CHART_PERIODS)[number]['id']>('24h')
+  const [activePeriod, setActivePeriod] = useState<(typeof CHART_PERIODS)[number]['id']>(
+    CHART_PERIODS[0].id,
+  )
 
   const { data: marketData = [], isLoading: isMarketLoading, isError: isMarketError, error: marketError, refetch: refetchMarket } = useCoinsQuery({
     currency,
