@@ -17,6 +17,7 @@ export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number]['code']
 export const DEFAULT_CURRENCY: CurrencyCode = 'usd'
 export const POLLING_INTERVAL_MS = 60_000
 export const MARKET_PAGE_SIZE = 100
+export const MAX_COIN_IDS_PER_REQUEST = 250
 export const DEFAULT_COIN_IDS = ['bitcoin', 'ethereum', 'tether', 'binancecoin', 'solana'] as const
 export const CHART_PERIODS = [
   { id: '24h', label: '24h', days: 1 },

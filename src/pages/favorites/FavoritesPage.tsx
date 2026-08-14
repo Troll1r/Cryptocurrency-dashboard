@@ -9,12 +9,16 @@ export function FavoritesPage() {
   const currency = useCurrencyStore((state) => state.currency)
   const favoriteIds = useFavoritesStore((state) => state.favoriteIds)
   const clearFavorites = useFavoritesStore((state) => state.clearFavorites)
+  const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite)
   const { data = [], isLoading, isError, error, refetch } = useCoinsQuery({
     currency,
     ids: favoriteIds,
   })
 
   const favoriteCount = favoriteIds.length
+  const unavailableFavoriteIds = favoriteIds.filter(
+    (favoriteId) => !data.some((coin) => coin.id === favoriteId),
+  )
   const orderedCoins = useMemo(
     () =>
       favoriteIds
@@ -57,8 +61,20 @@ export function FavoritesPage() {
         </Card>
       ) : null}
 
-      {!isLoading && !isError && favoriteCount > 0 && orderedCoins.length === 0 ? (
-        <Card className="p-5 text-slate-300">Your saved coins are loading. Please wait a moment.</Card>
+      {!isLoading && !isError && unavailableFavoriteIds.length > 0 ? (
+        <Card className="space-y-3 p-5">
+          <p className="text-slate-300">Some saved coins are no longer available from the data provider.</p>
+          <ul className="space-y-2">
+            {unavailableFavoriteIds.map((favoriteId) => (
+              <li key={favoriteId} className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-400">
+                <span>{favoriteId}</span>
+                <Button type="button" variant="secondary" onClick={() => toggleFavorite(favoriteId)}>
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </Card>
       ) : null}
 
       {!isLoading && !isError && orderedCoins.length > 0 ? (

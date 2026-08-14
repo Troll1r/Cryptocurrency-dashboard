@@ -2,17 +2,13 @@ import { Link } from 'react-router-dom'
 import { CoinCard, useCoinsQuery } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { AddToFavoritesButton } from '@/features/add-to-favorites'
-import { DEFAULT_COIN_IDS } from '@/shared/config'
 import { formatCompactNumber, formatPrice } from '@/shared/lib'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
 
 export function HomePage() {
   const currency = useCurrencyStore((state) => state.currency)
-  const { data = [], isLoading, isError, error, refetch } = useCoinsQuery({
-    currency,
-    ids: DEFAULT_COIN_IDS,
-  })
+  const { data = [], isLoading, isError, error, refetch } = useCoinsQuery({ currency })
 
   const totalMarketCap = data.reduce((total, coin) => total + (coin.marketCap ?? 0), 0)
   const totalVolume = data.reduce((total, coin) => total + (coin.totalVolume ?? 0), 0)
@@ -45,11 +41,11 @@ export function HomePage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Tracked market cap</p>
+          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Loaded market cap</p>
           <p className="mt-3 text-2xl font-bold text-white">{formatPrice(totalMarketCap, currency)}</p>
         </Card>
         <Card>
-          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">30d volume</p>
+          <p className="text-sm uppercase tracking-[0.18em] text-slate-400">24h volume</p>
           <p className="mt-3 text-2xl font-bold text-white">{formatPrice(totalVolume, currency)}</p>
         </Card>
         <Card>
@@ -60,7 +56,7 @@ export function HomePage() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-white">Top movers</h2>
+          <h2 className="text-xl font-semibold text-white">Top assets</h2>
           <Link to="/market" className="text-sm font-medium text-sky-400 hover:text-sky-300">
             View all
           </Link>

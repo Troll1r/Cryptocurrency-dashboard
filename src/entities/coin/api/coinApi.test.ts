@@ -71,6 +71,33 @@ describe('getCoinsMarkets', () => {
 
     expect(mocks.get).not.toHaveBeenCalled()
   })
+
+  it('batches more than 250 requested IDs', async () => {
+    const ids = Array.from({ length: 251 }, (_, index) => `coin-${index + 1}`)
+    mocks.get.mockResolvedValue({ data: [] })
+
+    await expect(getCoinsMarkets({ currency: 'usd', ids })).resolves.toEqual([])
+
+    expect(mocks.get).toHaveBeenCalledTimes(2)
+    expect(mocks.get).toHaveBeenNthCalledWith(1, '/coins/markets', {
+      params: {
+        vs_currency: 'usd',
+        order: 'market_cap_desc',
+        per_page: 250,
+        page: 1,
+        ids: ids.slice(0, 250).join(','),
+      },
+    })
+    expect(mocks.get).toHaveBeenNthCalledWith(2, '/coins/markets', {
+      params: {
+        vs_currency: 'usd',
+        order: 'market_cap_desc',
+        per_page: 1,
+        page: 1,
+        ids: 'coin-251',
+      },
+    })
+  })
 })
 
 describe('getMarketChart', () => {

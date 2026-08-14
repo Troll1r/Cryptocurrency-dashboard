@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CoinCard } from '@/entities/coin'
-import type { Coin } from '@/entities/coin/model/types'
+import type { Coin } from '@/entities/coin'
 import { AddToFavoritesButton } from '@/features/add-to-favorites'
 import type { CurrencyCode } from '@/shared/config'
 import { Button } from '@/shared/ui/Button'

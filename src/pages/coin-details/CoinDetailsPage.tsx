@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useCoinsQuery, useMarketChartQuery } from '@/entities/coin'
-import { useFavoritesStore } from '@/entities/coin/model/useFavoritesStore'
+import { Link, useParams } from 'react-router-dom'
+import { useCoinsQuery, useFavoritesStore, useMarketChartQuery } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { AddToFavoritesButton } from '@/features/add-to-favorites'
 import { CHART_PERIODS } from '@/shared/config'
@@ -24,13 +23,27 @@ export function CoinDetailsPage() {
 
   const coin = marketData[0]
 
-  const { data: chartData = [], isLoading: isChartLoading, refetch: refetchChart } = useMarketChartQuery({
+  const {
+    data: chartData = [],
+    isLoading: isChartLoading,
+    isError: isChartError,
+    error: chartError,
+    refetch: refetchChart,
+  } = useMarketChartQuery({
     id,
     currency,
     period: activePeriod,
   })
 
   const favoriteIds = useFavoritesStore((state) => state.favoriteIds)
+  const priceChangeTone =
+    coin?.priceChangePercentage24h === null || coin?.priceChangePercentage24h === undefined
+      ? 'text-slate-400'
+      : coin.priceChangePercentage24h > 0
+        ? 'text-emerald-400'
+        : coin.priceChangePercentage24h < 0
+          ? 'text-rose-400'
+          : 'text-slate-400'
 
   const marketStats = useMemo(() => {
     if (!coin) {
@@ -63,6 +76,9 @@ export function CoinDetailsPage() {
         <Button type="button" variant="secondary" onClick={() => refetchMarket()}>
           Retry
         </Button>
+        <Link to="/market" className="text-sm font-medium text-sky-400 hover:text-sky-300">
+          Back to market
+        </Link>
       </section>
     )
   }
@@ -93,14 +109,14 @@ export function CoinDetailsPage() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm text-slate-400">24h change</p>
-                <p className={coin.priceChangePercentage24h && coin.priceChangePercentage24h >= 0 ? 'mt-2 text-2xl font-bold text-emerald-400' : 'mt-2 text-2xl font-bold text-rose-400'}>
+                <p className={`mt-2 text-2xl font-bold ${priceChangeTone}`}>
                   {coin.priceChangePercentage24h === null || coin.priceChangePercentage24h === undefined
                     ? '—'
                     : `${coin.priceChangePercentage24h >= 0 ? '+' : ''}${coin.priceChangePercentage24h.toFixed(2)}%`}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-400">Listed</p>
+                <p className="text-sm text-slate-400">Last updated</p>
                 <p className="mt-2 text-base font-semibold text-white">{new Date(coin.lastUpdated).toLocaleDateString(undefined, { dateStyle: 'medium' })}</p>
               </div>
             </div>
@@ -125,11 +141,20 @@ export function CoinDetailsPage() {
               <div className="flex min-h-72 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70">
                 <Loader label="Loading chart" />
               </div>
+            ) : isChartError ? (
+              <Card className="space-y-3 p-5">
+                <p className="text-sm text-rose-300">
+                  {chartError instanceof Error ? chartError.message : 'Unable to load chart data.'}
+                </p>
+                <Button type="button" variant="secondary" onClick={() => refetchChart()}>
+                  Retry chart
+                </Button>
+              </Card>
             ) : (
               <PriceChart data={chartData} currency={currency} activePeriod={activePeriod} onPeriodChange={setActivePeriod} />
             )}
 
-            {chartData.length === 0 && !isChartLoading ? (
+            {chartData.length === 0 && !isChartLoading && !isChartError ? (
               <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/60 p-4 text-slate-400">
                 No chart data is available for this period.
               </div>

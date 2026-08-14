@@ -99,4 +99,14 @@ describe('CurrencyConverter', () => {
 
     expect(screen.getByText('No coin selected')).toBeInTheDocument()
   })
+
+  it('initializes both coin selections after asynchronous data loading', () => {
+    const { rerender } = render(<CurrencyConverter coins={[]} currency="usd" />)
+
+    rerender(<CurrencyConverter coins={[mockCoin, mockEthereum]} currency="usd" />)
+
+    expect(screen.getByRole('combobox', { name: 'Select source cryptocurrency' })).toHaveValue('bitcoin')
+    expect(screen.getByRole('combobox', { name: 'Select target cryptocurrency' })).toHaveValue('ethereum')
+    expect(screen.getByRole('heading', { name: 'Convert Bitcoin' })).toBeInTheDocument()
+  })
 })

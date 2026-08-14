@@ -1,16 +1,19 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN corepack enable && pnpm install --frozen-lockfile
 
 COPY . .
+ARG VITE_COINGECKO_API_KEY
+ARG VITE_COINGECKO_API_BASE_URL
+ENV VITE_COINGECKO_API_KEY=${VITE_COINGECKO_API_KEY}
+ENV VITE_COINGECKO_API_BASE_URL=${VITE_COINGECKO_API_BASE_URL}
 RUN pnpm build
 
 FROM nginx:1.27-alpine
 WORKDIR /usr/share/nginx/html
 
-RUN apk add --no-cache shadow && usermod -u 101 nginx && groupmod -g 101 nginx
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist .
 
@@ -20,5 +23,5 @@ RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run /etc/ng
     chown -R nginx:nginx /var/run/nginx.pid
 
 USER nginx
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

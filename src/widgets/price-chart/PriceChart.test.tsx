@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatXAxisTick } from './PriceChart'
+import { formatXAxisTick } from './lib/formatXAxisTick'
 
 describe('PriceChart', () => {
   it('shows hour labels for 24h period and date labels for longer periods', () => {

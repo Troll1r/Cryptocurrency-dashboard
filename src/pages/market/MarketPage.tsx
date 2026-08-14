@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { CoinList } from '@/widgets/coin-list'
 import { useCoinsQuery } from '@/entities/coin'
+import type { Coin } from '@/entities/coin'
 import { useCurrencyStore } from '@/entities/currency'
 import { MARKET_PAGE_SIZE } from '@/shared/config'
-import type { Coin } from '@/entities/coin/model/types'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
 
