@@ -1,0 +1,1 @@
+export { CoinDetailsPage } from './CoinDetailsPage'
