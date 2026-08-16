@@ -16,6 +16,7 @@ storybook-static
 .env
 .env.*
 !.env.example
+docs
 
 # Editor directories and files
 .vscode/*
